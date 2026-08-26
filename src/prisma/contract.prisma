@@ -1,0 +1,55 @@
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  slug      String   @unique
+  events    Event[]
+  createdAt TimestamptzString @default(now())
+  updatedAt temporal.updatedAtString()
+}
+
+model Event {
+  id          Int      @id @default(autoincrement())
+  title       String
+  slug        String   @unique
+  description String?
+  date        DateTime
+  coverImage  String
+  category    Category @relation(fields: [categoryId], references: [id])
+  categoryId  Int
+  photos      Photo[]
+  createdAt   TimestamptzString @default(now())
+  updatedAt   temporal.updatedAtString()
+}
+
+model Photo {
+  id        Int      @id @default(autoincrement())
+  url       String
+  title     String?
+  event     Event   @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  eventId   Int
+  createdAt TimestamptzString @default(now())
+  updatedAt temporal.updatedAtString()
+}
+
+model Message {
+  id          Int      @id @default(autoincrement())
+  name        String
+  email       String
+  phone       String?
+  eventType   String
+  eventDate   DateTime?
+  budget      String?
+  message     String
+  status      String   @default("NEW")
+  createdAt   TimestamptzString @default(now())
+  updatedAt   temporal.updatedAtString()
+}
+
+model Admin {
+  id           Int      @id @default(autoincrement())
+  email        String   @unique
+  passwordHash String
+  name         String
+  createdAt    TimestamptzString @default(now())
+  updatedAt    temporal.updatedAtString()
+}
