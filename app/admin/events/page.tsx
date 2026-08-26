@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowLeft, Plus } from "lucide-react";
+import { ArrowLeft, Plus, Pencil, ExternalLink } from "lucide-react";
 import { getCategories, getEvents } from "@/lib/events";
 
 export default async function AdminEventsPage() {
@@ -9,16 +9,14 @@ export default async function AdminEventsPage() {
   ]);
 
   const categoryMap = new Map(
-    categories.map((category) => [
-      category.id,
-      category.name,
-    ])
+    categories.map((category) => [category.id, category.name])
   );
 
   return (
     <main className="min-h-screen bg-[#050505] px-6 py-12 text-white lg:px-10">
       <div className="mx-auto max-w-7xl">
 
+        {/* RETOUR */}
         <Link
           href="/admin"
           className="mb-10 flex w-fit items-center gap-2 text-xs uppercase tracking-wider text-white/40 transition hover:text-white"
@@ -27,6 +25,7 @@ export default async function AdminEventsPage() {
           Dashboard
         </Link>
 
+        {/* HEADER */}
         <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
           <div>
             <p className="mb-3 text-[10px] uppercase tracking-[0.35em] text-[#FFD400]">
@@ -53,6 +52,7 @@ export default async function AdminEventsPage() {
           </Link>
         </div>
 
+        {/* TABLE */}
         <div className="mt-12 overflow-hidden border border-white/10">
 
           {events.length === 0 ? (
@@ -63,9 +63,11 @@ export default async function AdminEventsPage() {
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full min-w-[700px] border-collapse">
+              <table className="w-full min-w-[800px] border-collapse">
+
                 <thead>
                   <tr className="border-b border-white/10 bg-white/[0.03] text-left">
+
                     <th className="px-6 py-4 text-[10px] uppercase tracking-[0.25em] text-white/30">
                       Événement
                     </th>
@@ -79,18 +81,23 @@ export default async function AdminEventsPage() {
                     </th>
 
                     <th className="px-6 py-4 text-right text-[10px] uppercase tracking-[0.25em] text-white/30">
-                      Action
+                      Actions
                     </th>
+
                   </tr>
                 </thead>
 
                 <tbody>
+
                   {events.map((event) => (
                     <tr
                       key={event.id}
                       className="border-b border-white/10 transition hover:bg-white/[0.02]"
                     >
+
+                      {/* EVENT */}
                       <td className="px-6 py-5">
+
                         <p className="font-light">
                           {event.title}
                         </p>
@@ -98,31 +105,48 @@ export default async function AdminEventsPage() {
                         <p className="mt-1 text-xs text-white/30">
                           /portfolio/{event.slug}
                         </p>
+
                       </td>
 
+                      {/* CATEGORY */}
                       <td className="px-6 py-5 text-sm text-white/50">
                         {categoryMap.get(event.categoryId) ??
                           "Non classé"}
                       </td>
 
+                      {/* DATE */}
                       <td className="px-6 py-5 text-sm text-white/50">
                         {event.date
-                          .toZonedDateTimeISO(
-                            "Africa/Kinshasa"
-                          )
+                          .toZonedDateTimeISO("Africa/Kinshasa")
                           .year}
                       </td>
 
-                      <td className="px-6 py-5 text-right">
-                        <Link
-                          href={`/admin/events/${event.id}`}
-                          className="text-xs uppercase tracking-wider text-[#FFD400] hover:text-white"
-                        >
-                          Voir
-                        </Link>
+                      {/* ACTIONS */}
+                      <td className="px-6 py-5">
+                        <div className="flex justify-end gap-4">
+
+                          <Link
+                            href={`/admin/events/${event.id}/edit`}
+                            className="flex items-center gap-2 text-xs uppercase tracking-wider text-white/50 transition hover:text-white"
+                          >
+                            <Pencil size={14} />
+                            Modifier
+                          </Link>
+
+                          <Link
+                            href={`/portfolio/${event.slug}`}
+                            className="flex items-center gap-2 text-xs uppercase tracking-wider text-[#FFD400] transition hover:text-white"
+                          >
+                            <ExternalLink size={14} />
+                            Voir
+                          </Link>
+
+                        </div>
                       </td>
+
                     </tr>
                   ))}
+
                 </tbody>
               </table>
             </div>
