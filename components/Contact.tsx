@@ -20,10 +20,58 @@ const eventTypes = [
 
 export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  async function handleSubmit(
+    event: FormEvent<HTMLFormElement>
+  ) {
     event.preventDefault();
-    setSubmitted(true);
+
+    setLoading(true);
+    setError("");
+
+    const formData = new FormData(event.currentTarget);
+
+    const payload = {
+      name: String(formData.get("name") ?? ""),
+      email: String(formData.get("email") ?? ""),
+      phone: String(formData.get("phone") ?? ""),
+      eventType: String(formData.get("event") ?? ""),
+      date: String(formData.get("date") ?? ""),
+      budget: String(formData.get("budget") ?? ""),
+      message: String(formData.get("message") ?? ""),
+    };
+
+    try {
+      const response = await fetch("/api/messages", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(
+          data.error ??
+            "Impossible d'envoyer la demande."
+        );
+      }
+
+      setSubmitted(true);
+      event.currentTarget.reset();
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Une erreur est survenue."
+      );
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -35,7 +83,6 @@ export default function Contact() {
 
         {/* HEADER */}
         <div className="mb-20 max-w-3xl">
-
           <div className="mb-6 flex items-center gap-3">
             <span className="h-[2px] w-10 bg-[#FFD400]" />
 
@@ -57,7 +104,6 @@ export default function Contact() {
             Parlons-en et construisons ensemble une prestation adaptée
             à vos besoins.
           </p>
-
         </div>
 
         {/* CONTENT */}
@@ -65,12 +111,11 @@ export default function Contact() {
 
           {/* CONTACT INFO */}
           <div>
-
             <div className="space-y-8">
 
               {/* PHONE */}
               <a
-                href="tel:+243 977 307 526"
+                href="tel:+243977307526"
                 className="group flex items-start gap-5"
               >
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center border border-white/10 transition group-hover:border-[#FFD400] group-hover:bg-[#FFD400] group-hover:text-black">
@@ -124,12 +169,10 @@ export default function Contact() {
                   </p>
                 </div>
               </div>
-
             </div>
 
             {/* SOCIAL */}
             <div className="mt-16 border-t border-white/10 pt-8">
-
               <p className="mb-5 text-[10px] uppercase tracking-[0.3em] text-white/30">
                 Retrouvez-nous
               </p>
@@ -161,9 +204,7 @@ export default function Contact() {
                 </a>
 
               </div>
-
             </div>
-
           </div>
 
           {/* FORM */}
@@ -186,7 +227,11 @@ export default function Contact() {
                 </p>
 
                 <button
-                  onClick={() => setSubmitted(false)}
+                  type="button"
+                  onClick={() => {
+                    setSubmitted(false);
+                    setError("");
+                  }}
                   className="mt-8 text-xs font-semibold uppercase tracking-[0.2em] text-[#FFD400] hover:text-white"
                 >
                   Envoyer une autre demande
@@ -194,196 +239,205 @@ export default function Contact() {
 
               </div>
             ) : (
-              <form onSubmit={handleSubmit}>
-
-                <div className="grid gap-8 sm:grid-cols-2">
-
-                  {/* NAME */}
-                  <div>
-                    <label
-                      htmlFor="name"
-                      className="mb-3 block text-[10px] uppercase tracking-[0.3em] text-white/35"
-                    >
-                      Nom complet
-                    </label>
-
-                    <input
-                      id="name"
-                      name="name"
-                      type="text"
-                      required
-                      placeholder="Votre nom"
-                      className="w-full border-b border-white/15 bg-transparent py-3 text-sm text-white outline-none placeholder:text-white/20 transition focus:border-[#FFD400]"
-                    />
+              <>
+                {/* ERROR */}
+                {error && (
+                  <div className="mb-8 border border-red-500/30 bg-red-500/10 px-5 py-4 text-sm text-red-300">
+                    {error}
                   </div>
+                )}
 
-                  {/* EMAIL */}
-                  <div>
-                    <label
-                      htmlFor="email"
-                      className="mb-3 block text-[10px] uppercase tracking-[0.3em] text-white/35"
-                    >
-                      Email
-                    </label>
+                <form onSubmit={handleSubmit}>
 
-                    <input
-                      id="email"
-                      name="email"
-                      type="email"
-                      required
-                      placeholder="vous@email.com"
-                      className="w-full border-b border-white/15 bg-transparent py-3 text-sm text-white outline-none placeholder:text-white/20 transition focus:border-[#FFD400]"
-                    />
-                  </div>
+                  <div className="grid gap-8 sm:grid-cols-2">
 
-                  {/* PHONE */}
-                  <div>
-                    <label
-                      htmlFor="phone"
-                      className="mb-3 block text-[10px] uppercase tracking-[0.3em] text-white/35"
-                    >
-                      Téléphone
-                    </label>
+                    {/* NAME */}
+                    <div>
+                      <label
+                        htmlFor="name"
+                        className="mb-3 block text-[10px] uppercase tracking-[0.3em] text-white/35"
+                      >
+                        Nom complet
+                      </label>
 
-                    <input
-                      id="phone"
-                      name="phone"
-                      type="tel"
-                      placeholder="+243 ..."
-                      className="w-full border-b border-white/15 bg-transparent py-3 text-sm text-white outline-none placeholder:text-white/20 transition focus:border-[#FFD400]"
-                    />
-                  </div>
+                      <input
+                        id="name"
+                        name="name"
+                        type="text"
+                        required
+                        placeholder="Votre nom"
+                        className="w-full border-b border-white/15 bg-transparent py-3 text-sm text-white outline-none placeholder:text-white/20 transition focus:border-[#FFD400]"
+                      />
+                    </div>
 
-                  {/* EVENT */}
-                  <div>
-                    <label
-                      htmlFor="event"
-                      className="mb-3 block text-[10px] uppercase tracking-[0.3em] text-white/35"
-                    >
-                      Type d'événement
-                    </label>
+                    {/* EMAIL */}
+                    <div>
+                      <label
+                        htmlFor="email"
+                        className="mb-3 block text-[10px] uppercase tracking-[0.3em] text-white/35"
+                      >
+                        Email
+                      </label>
 
-                    <select
-                      id="event"
-                      name="event"
-                      required
-                      defaultValue=""
-                      className="w-full border-b border-white/15 bg-[#050505] py-3 text-sm text-white outline-none transition focus:border-[#FFD400]"
-                    >
-                      <option value="" disabled>
-                        Sélectionner
-                      </option>
+                      <input
+                        id="email"
+                        name="email"
+                        type="email"
+                        required
+                        placeholder="vous@email.com"
+                        className="w-full border-b border-white/15 bg-transparent py-3 text-sm text-white outline-none placeholder:text-white/20 transition focus:border-[#FFD400]"
+                      />
+                    </div>
 
-                      {eventTypes.map((type) => (
-                        <option key={type} value={type}>
-                          {type}
+                    {/* PHONE */}
+                    <div>
+                      <label
+                        htmlFor="phone"
+                        className="mb-3 block text-[10px] uppercase tracking-[0.3em] text-white/35"
+                      >
+                        Téléphone
+                      </label>
+
+                      <input
+                        id="phone"
+                        name="phone"
+                        type="tel"
+                        placeholder="+243 ..."
+                        className="w-full border-b border-white/15 bg-transparent py-3 text-sm text-white outline-none placeholder:text-white/20 transition focus:border-[#FFD400]"
+                      />
+                    </div>
+
+                    {/* EVENT */}
+                    <div>
+                      <label
+                        htmlFor="event"
+                        className="mb-3 block text-[10px] uppercase tracking-[0.3em] text-white/35"
+                      >
+                        Type d'événement
+                      </label>
+
+                      <select
+                        id="event"
+                        name="event"
+                        required
+                        defaultValue=""
+                        className="w-full border-b border-white/15 bg-[#050505] py-3 text-sm text-white outline-none transition focus:border-[#FFD400]"
+                      >
+                        <option value="" disabled>
+                          Sélectionner
                         </option>
-                      ))}
-                    </select>
+
+                        {eventTypes.map((type) => (
+                          <option key={type} value={type}>
+                            {type}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    {/* DATE */}
+                    <div>
+                      <label
+                        htmlFor="date"
+                        className="mb-3 block text-[10px] uppercase tracking-[0.3em] text-white/35"
+                      >
+                        Date de l'événement
+                      </label>
+
+                      <input
+                        id="date"
+                        name="date"
+                        type="date"
+                        className="w-full border-b border-white/15 bg-transparent py-3 text-sm text-white outline-none transition focus:border-[#FFD400]"
+                      />
+                    </div>
+
+                    {/* BUDGET */}
+                    <div>
+                      <label
+                        htmlFor="budget"
+                        className="mb-3 block text-[10px] uppercase tracking-[0.3em] text-white/35"
+                      >
+                        Budget estimatif
+                      </label>
+
+                      <select
+                        id="budget"
+                        name="budget"
+                        defaultValue=""
+                        className="w-full border-b border-white/15 bg-[#050505] py-3 text-sm text-white outline-none transition focus:border-[#FFD400]"
+                      >
+                        <option value="" disabled>
+                          Sélectionner
+                        </option>
+
+                        <option value="moins-300">
+                          Moins de 300 $
+                        </option>
+
+                        <option value="300-500">
+                          300 $ – 500 $
+                        </option>
+
+                        <option value="500-1000">
+                          500 $ – 1 000 $
+                        </option>
+
+                        <option value="plus-1000">
+                          Plus de 1 000 $
+                        </option>
+                      </select>
+                    </div>
+
                   </div>
 
-                  {/* DATE */}
-                  <div>
+                  {/* MESSAGE */}
+                  <div className="mt-8">
                     <label
-                      htmlFor="date"
+                      htmlFor="message"
                       className="mb-3 block text-[10px] uppercase tracking-[0.3em] text-white/35"
                     >
-                      Date de l'événement
+                      Votre projet
                     </label>
 
-                    <input
-                      id="date"
-                      name="date"
-                      type="date"
-                      className="w-full border-b border-white/15 bg-transparent py-3 text-sm text-white outline-none transition focus:border-[#FFD400]"
+                    <textarea
+                      id="message"
+                      name="message"
+                      rows={5}
+                      required
+                      placeholder="Parlez-nous de votre événement..."
+                      className="w-full resize-none border-b border-white/15 bg-transparent py-3 text-sm leading-7 text-white outline-none placeholder:text-white/20 transition focus:border-[#FFD400]"
                     />
                   </div>
 
-                  {/* BUDGET */}
-                  <div>
-                    <label
-                      htmlFor="budget"
-                      className="mb-3 block text-[10px] uppercase tracking-[0.3em] text-white/35"
-                    >
-                      Budget estimatif
-                    </label>
-
-                    <select
-                      id="budget"
-                      name="budget"
-                      defaultValue=""
-                      className="w-full border-b border-white/15 bg-[#050505] py-3 text-sm text-white outline-none transition focus:border-[#FFD400]"
-                    >
-                      <option value="" disabled>
-                        Sélectionner
-                      </option>
-
-                      <option value="moins-300">
-                        Moins de 300 $
-                      </option>
-
-                      <option value="300-500">
-                        300 $ – 500 $
-                      </option>
-
-                      <option value="500-1000">
-                        500 $ – 1 000 $
-                      </option>
-
-                      <option value="plus-1000">
-                        Plus de 1 000 $
-                      </option>
-                    </select>
-                  </div>
-
-                </div>
-
-                {/* MESSAGE */}
-                <div className="mt-8">
-
-                  <label
-                    htmlFor="message"
-                    className="mb-3 block text-[10px] uppercase tracking-[0.3em] text-white/35"
+                  {/* SUBMIT */}
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="group mt-10 flex w-full items-center justify-center gap-4 bg-[#FFD400] px-7 py-5 text-sm font-bold uppercase tracking-wider text-black transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-50"
                   >
-                    Votre projet
-                  </label>
+                    {loading
+                      ? "Envoi en cours..."
+                      : "Envoyer ma demande"}
 
-                  <textarea
-                    id="message"
-                    name="message"
-                    rows={5}
-                    required
-                    placeholder="Parlez-nous de votre événement..."
-                    className="w-full resize-none border-b border-white/15 bg-transparent py-3 text-sm leading-7 text-white outline-none placeholder:text-white/20 transition focus:border-[#FFD400]"
-                  />
+                    <ArrowUpRight
+                      size={18}
+                      className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"
+                    />
+                  </button>
 
-                </div>
+                  <p className="mt-4 text-center text-[10px] leading-5 text-white/25">
+                    En envoyant ce formulaire, vous acceptez d'être
+                    recontacté concernant votre demande.
+                  </p>
 
-                {/* SUBMIT */}
-                <button
-                  type="submit"
-                  className="group mt-10 flex w-full items-center justify-center gap-4 bg-[#FFD400] px-7 py-5 text-sm font-bold uppercase tracking-wider text-black transition hover:bg-white"
-                >
-                  Envoyer ma demande
-
-                  <ArrowUpRight
-                    size={18}
-                    className="transition-transform group-hover:translate-x-1 group-hover:-translate-y-1"
-                  />
-                </button>
-
-                <p className="mt-4 text-center text-[10px] leading-5 text-white/25">
-                  En envoyant ce formulaire, vous acceptez d'être
-                  recontacté concernant votre demande.
-                </p>
-
-              </form>
+                </form>
+              </>
             )}
 
           </div>
 
         </div>
-
       </div>
     </section>
   );
