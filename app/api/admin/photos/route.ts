@@ -21,14 +21,7 @@ export async function POST(request: Request) {
 
     if (!(file instanceof File)) {
       return Response.json(
-        { error: "Aucun fichier image." },
-        { status: 400 }
-      );
-    }
-
-    if (!Number.isInteger(eventId)) {
-      return Response.json(
-        { error: "Événement invalide." },
+        { error: "Aucun fichier sélectionné." },
         { status: 400 }
       );
     }
@@ -40,23 +33,36 @@ export async function POST(request: Request) {
       );
     }
 
-    const event = await db.orm.public.Event
+    if (!Number.isInteger(eventId)) {
+      return Response.json(
+        { error: "Événement invalide." },
+        { status: 400 }
+      );
+    }
+
+    const events = await db.orm.public.Event
       .select("id", "slug")
-      .where({
-        id: eventId,
-      })
+      .where({ id: eventId })
       .all();
 
-    if (event.length === 0) {
+    const event = events[0];
+
+    if (!event) {
       return Response.json(
         { error: "Événement introuvable." },
         { status: 404 }
       );
     }
 
-    const filename = `events/${event[0].slug}/${Date.now()}-${file.name}`;
+    const safeName = file.name.replace(
+      /[^a-zA-Z0-9._-]/g,
+      "-"
+    );
 
-    const blob = await put(filename, file, {
+    const pathname =
+      `events/${event.slug}/${Date.now()}-${safeName}`;
+
+    const blob = await put(pathname, file, {
       access: "public",
     });
 

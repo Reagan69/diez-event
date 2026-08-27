@@ -142,7 +142,6 @@ export default async function AdminEventPage({ params }: Props) {
 
           <PhotoUploader
             eventId={event.id}
-            eventSlug={event.slug}
             />
 
         </section>

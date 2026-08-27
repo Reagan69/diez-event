@@ -1,17 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { upload } from "@vercel/blob/client";
 import { Upload, X } from "lucide-react";
 
 type PhotoUploaderProps = {
   eventId: number;
-  eventSlug: string;
 };
 
 export default function PhotoUploader({
   eventId,
-  eventSlug,
 }: PhotoUploaderProps) {
   const [files, setFiles] = useState<File[]>([]);
   const [loading, setLoading] = useState(false);
@@ -21,20 +18,20 @@ export default function PhotoUploader({
   function handleFiles(
     event: React.ChangeEvent<HTMLInputElement>
   ) {
-    const selectedFiles = Array.from(event.target.files ?? []);
-
-    const images = selectedFiles.filter((file) =>
+    const selectedFiles = Array.from(
+      event.target.files ?? []
+    ).filter((file) =>
       file.type.startsWith("image/")
     );
 
-    setFiles(images);
+    setFiles(selectedFiles);
     setMessage("");
     setProgress(0);
   }
 
   function removeFile(index: number) {
     setFiles((current) =>
-      current.filter((_, fileIndex) => fileIndex !== index)
+      current.filter((_, i) => i !== index)
     );
   }
 
@@ -49,49 +46,41 @@ export default function PhotoUploader({
     setProgress(0);
 
     try {
-      let uploaded = 0;
+      for (let i = 0; i < files.length; i++) {
+        const formData = new FormData();
 
-      for (const file of files) {
-        const blob = await upload(
-          `events/${eventSlug}/${Date.now()}-${file.name}`,
-          file,
+        formData.append("file", files[i]);
+        formData.append("eventId", String(eventId));
+        formData.append("title", files[i].name);
+
+        const response = await fetch(
+          "/api/admin/photos",
           {
-            access: "public",
-            handleUploadUrl: "/api/admin/photos/upload",
+            method: "POST",
+            body: formData,
           }
         );
-
-        const response = await fetch("/api/admin/photos", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            eventId,
-            url: blob.url,
-            title: file.name,
-          }),
-        });
 
         const data = await response.json();
 
         if (!response.ok) {
           throw new Error(
-            data.error ?? "Impossible d'enregistrer la photo."
+            data.error ??
+              "Impossible d'envoyer la photo."
           );
         }
 
-        uploaded += 1;
-
         setProgress(
-          Math.round((uploaded / files.length) * 100)
+          Math.round(((i + 1) / files.length) * 100)
         );
       }
 
       setMessage(
-        `${uploaded} photo${uploaded > 1 ? "s" : ""} ajoutée${
-          uploaded > 1 ? "s" : ""
-       } avec succès.`
+        `${files.length} photo${
+          files.length > 1 ? "s" : ""
+        } ajoutée${
+          files.length > 1 ? "s" : ""
+        } avec succès.`
       );
 
       setFiles([]);
@@ -101,7 +90,7 @@ export default function PhotoUploader({
       setMessage(
         error instanceof Error
           ? error.message
-          : "Une erreur est survenue pendant l'upload."
+          : "Une erreur est survenue."
       );
     } finally {
       setLoading(false);
@@ -116,7 +105,7 @@ export default function PhotoUploader({
 
       <input
         type="file"
-        accept="image/*"
+        accept="image/jpeg,image/png,image/webp,image/gif"
         multiple
         onChange={handleFiles}
         disabled={loading}
