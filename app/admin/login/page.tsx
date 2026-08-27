@@ -43,7 +43,7 @@ export default function AdminLoginPage() {
 
           <div className="mx-auto relative h-20 w-20">
             <Image
-              src="/logo-diez-event.png"
+              src="/logo-diez-event v2.png"
               alt="Diez Events"
               fill
               priority

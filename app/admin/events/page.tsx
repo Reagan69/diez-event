@@ -27,30 +27,30 @@ export default async function AdminEventsPage() {
 
         {/* HEADER */}
         <div className="flex flex-col justify-between gap-6 sm:flex-row sm:items-end">
-          <div>
-            <p className="mb-3 text-[10px] uppercase tracking-[0.35em] text-[#FFD400]">
-              Administration
-            </p>
+                <div>
+                <p className="mb-3 text-[10px] uppercase tracking-[0.35em] text-[#FFD400]">
+                Administration
+                </p>
 
-            <h1 className="text-5xl font-light">
-              Événements
-            </h1>
+                <h1 className="text-5xl font-light">
+                Événements
+                </h1>
 
-            <p className="mt-4 text-sm text-white/40">
-              {events.length} événement
-              {events.length > 1 ? "s" : ""} enregistré
-              {events.length > 1 ? "s" : ""}.
-            </p>
-          </div>
+                <p className="mt-4 text-sm text-white/40">
+                {events.length} événement
+                {events.length > 1 ? "s" : ""} enregistré
+                {events.length > 1 ? "s" : ""}.
+                </p>
+            </div>
 
-          <Link
-            href="/admin/events/new"
-            className="flex w-fit items-center gap-3 bg-[#FFD400] px-5 py-3 text-sm font-semibold text-black transition hover:bg-white"
-          >
-            <Plus size={17} />
-            Nouvel événement
-          </Link>
-        </div>
+            <Link
+                href="/admin/events/new"
+                className="flex w-fit items-center gap-3 bg-[#FFD400] px-5 py-3 text-sm font-semibold text-black transition hover:bg-white"
+            >
+                <Plus size={17} />
+                Nouvel événement
+            </Link>
+        </div>  
 
         {/* TABLE */}
         <div className="mt-12 overflow-hidden border border-white/10">
