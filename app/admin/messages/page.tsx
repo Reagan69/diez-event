@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { db } from "@/src/prisma/db";
+import MessageActions from "@/components/admin/MessageActions";
 
 export default async function AdminMessagesPage() {
   const messages = await db.orm.public.Message
@@ -22,6 +23,7 @@ export default async function AdminMessagesPage() {
     <main className="min-h-screen bg-[#050505] px-6 py-12 text-white lg:px-10">
       <div className="mx-auto max-w-7xl">
 
+        {/* RETOUR */}
         <Link
           href="/admin"
           className="mb-10 flex w-fit items-center gap-2 text-xs uppercase tracking-wider text-white/40 transition hover:text-white"
@@ -30,6 +32,7 @@ export default async function AdminMessagesPage() {
           Dashboard
         </Link>
 
+        {/* HEADER */}
         <div className="mb-12">
           <p className="mb-3 text-[10px] uppercase tracking-[0.35em] text-[#FFD400]">
             Administration
@@ -46,6 +49,7 @@ export default async function AdminMessagesPage() {
           </p>
         </div>
 
+        {/* MESSAGES */}
         {messages.length === 0 ? (
           <div className="border border-white/10 p-16 text-center">
             <p className="text-sm text-white/30">
@@ -54,27 +58,46 @@ export default async function AdminMessagesPage() {
           </div>
         ) : (
           <div className="grid gap-5 lg:grid-cols-2">
+
             {messages.map((item) => (
               <article
                 key={item.id}
                 className="border border-white/10 bg-white/[0.02] p-7"
               >
+
+                {/* CLIENT */}
                 <div className="flex items-start justify-between gap-5">
                   <div>
                     <p className="text-xl font-light">
                       {item.name}
                     </p>
 
-                    <p className="mt-1 text-sm text-white/35">
+                    <a
+                      href={`mailto:${item.email}`}
+                      className="mt-1 block text-sm text-white/35 transition hover:text-white"
+                    >
                       {item.email}
-                    </p>
+                    </a>
                   </div>
 
-                  <span className="border border-[#FFD400]/30 px-3 py-1 text-[9px] uppercase tracking-[0.2em] text-[#FFD400]">
-                    {item.status}
+                  <span
+                    className={`border px-3 py-1 text-[9px] uppercase tracking-[0.2em] ${
+                      item.status === "DONE"
+                        ? "border-green-500/30 text-green-300"
+                        : item.status === "IN_PROGRESS"
+                          ? "border-blue-500/30 text-blue-300"
+                          : "border-[#FFD400]/30 text-[#FFD400]"
+                    }`}
+                  >
+                    {item.status === "NEW"
+                      ? "Nouveau"
+                      : item.status === "IN_PROGRESS"
+                        ? "En cours"
+                        : "Traité"}
                   </span>
                 </div>
 
+                {/* INFORMATIONS */}
                 <div className="mt-7 grid gap-5 sm:grid-cols-2">
 
                   <div>
@@ -92,9 +115,18 @@ export default async function AdminMessagesPage() {
                       Téléphone
                     </p>
 
-                    <p className="mt-2 text-sm text-white/70">
-                      {item.phone ?? "Non renseigné"}
-                    </p>
+                    {item.phone ? (
+                      <a
+                        href={`tel:${item.phone}`}
+                        className="mt-2 block text-sm text-white/70 hover:text-white"
+                      >
+                        {item.phone}
+                      </a>
+                    ) : (
+                      <p className="mt-2 text-sm text-white/30">
+                        Non renseigné
+                      </p>
+                    )}
                   </div>
 
                   <div>
@@ -126,7 +158,9 @@ export default async function AdminMessagesPage() {
 
                 </div>
 
+                {/* MESSAGE */}
                 <div className="mt-7 border-t border-white/10 pt-6">
+
                   <p className="text-[9px] uppercase tracking-[0.25em] text-white/25">
                     Projet
                   </p>
@@ -134,18 +168,39 @@ export default async function AdminMessagesPage() {
                   <p className="mt-3 text-sm leading-7 text-white/55">
                     {item.message}
                   </p>
+
                 </div>
 
-                {item.email && (
+                {/* CONTACT */}
+                <div className="mt-7 flex flex-wrap items-center gap-4">
+
                   <a
                     href={`mailto:${item.email}`}
-                    className="mt-7 inline-block text-xs uppercase tracking-[0.2em] text-[#FFD400] transition hover:text-white"
+                    className="text-xs uppercase tracking-[0.2em] text-[#FFD400] transition hover:text-white"
                   >
                     Répondre par email
                   </a>
-                )}
+
+                  {item.phone && (
+                    <a
+                      href={`tel:${item.phone}`}
+                      className="text-xs uppercase tracking-[0.2em] text-white/40 transition hover:text-white"
+                    >
+                      Appeler
+                    </a>
+                  )}
+
+                </div>
+
+                {/* ACTIONS */}
+                <MessageActions
+                  messageId={item.id}
+                  currentStatus={item.status}
+                />
+
               </article>
             ))}
+
           </div>
         )}
 
