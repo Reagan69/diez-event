@@ -1,70 +1,58 @@
 import { auth } from "@/auth";
-import { db } from "@/src/prisma/db";
+import {
+  handleUpload,
+  type HandleUploadBody,
+} from "@vercel/blob/client";
 
 export async function POST(request: Request) {
+  const session = await auth();
+
+  if (!session?.user) {
+    return Response.json(
+      { error: "Non autorisé." },
+      { status: 401 }
+    );
+  }
+
   try {
-    const session = await auth();
+    const body =
+      (await request.json()) as HandleUploadBody;
 
-    if (!session?.user) {
-      return Response.json(
-        { error: "Non autorisé." },
-        { status: 401 }
-      );
-    }
+    const response = await handleUpload({
+      body,
+      request,
 
-    const body = await request.json();
+      onBeforeGenerateToken: async () => {
+        return {
+          allowedContentTypes: [
+            "image/jpeg",
+            "image/png",
+            "image/webp",
+            "image/gif",
+          ],
+          maximumSizeInBytes: 20 * 1024 * 1024,
+          addRandomSuffix: true,
+        };
+      },
 
-    const eventId = Number(body.eventId);
-    const url = String(body.url ?? "").trim();
-    const title = String(body.title ?? "").trim();
-
-    if (!Number.isInteger(eventId)) {
-      return Response.json(
-        { error: "Événement invalide." },
-        { status: 400 }
-      );
-    }
-
-    if (!url) {
-      return Response.json(
-        { error: "URL de photo manquante." },
-        { status: 400 }
-      );
-    }
-
-    const event = await db.orm.public.Event
-      .select("id")
-      .where({
-        id: eventId,
-      })
-      .all();
-
-    if (event.length === 0) {
-      return Response.json(
-        { error: "Événement introuvable." },
-        { status: 404 }
-      );
-    }
-
-    const photo = await db.orm.public.Photo.create({
-      url,
-      title: title || null,
-      eventId,
+      onUploadCompleted: async () => {
+        // Rien ici pour le moment.
+        // L'URL est enregistrée ensuite dans PostgreSQL
+        // par /api/admin/photos.
+      },
     });
 
-    return Response.json(
-      {
-        success: true,
-        photo,
-      },
-      { status: 201 }
-    );
+    return Response.json(response);
   } catch (error) {
-    console.error("Erreur enregistrement photo :", error);
+    console.error(
+      "Erreur génération token Blob :",
+      error
+    );
 
     return Response.json(
       {
-        error: "Impossible d'enregistrer la photo.",
+        error:
+          "Impossible de préparer l'upload de la photo.",
       },
       { status: 500 }
     );
