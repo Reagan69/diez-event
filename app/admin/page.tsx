@@ -89,9 +89,6 @@ export default async function AdminDashboard() {
               <h1 className="text-5xl font-light sm:text-7xl">
                 Dashboard
               </h1>
-              <p className="mt-2 text-xs text-[#FFD400]">
-                Déploiement automatique Vercel — test
-              </p>
 
               <p className="mt-5 max-w-xl text-sm leading-7 text-white/40">
                 Gérez les événements, les photos, les catégories et les
