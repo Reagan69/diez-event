@@ -92,7 +92,7 @@ export default async function AdminDashboard() {
 
               <p className="mt-5 max-w-xl text-sm leading-7 text-white/40">
                 Gérez les événements, les photos, les catégories et les
-                demandes de clients depuis votre espace d'administration.
+                demandes de clients depuis votre espace d'administration
               </p>
             </div>
 
